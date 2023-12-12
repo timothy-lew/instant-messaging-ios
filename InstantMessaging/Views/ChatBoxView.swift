@@ -32,31 +32,43 @@ struct ChatBoxView: View {
             
             Divider()
             
-            Button("DEBUG", systemImage: "gobackward") {
-                Task {
-                    await getMessages()
-                }
-            }
+//            Button("DEBUG", systemImage: "gobackward") {
+//                Task {
+//                    await getMessages()
+//                }
+//            }
             
             ScrollView {
                 ForEach(messages, id:\.timestamp) { msg in
                     if (msg.senderId == senderNickName) {
                         HStack {
                             Spacer()
-                            Text(msg.content)
-                                .padding()
-                                .background(msg.senderId == senderNickName ? Color.blue : Color.gray)
-                                .foregroundColor(.white)
-                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            VStack(alignment: .trailing) {
+                                Text(msg.content)
+                                    .padding()
+                                    .background(msg.senderId == senderNickName ? Color.blue : Color.indigo)
+                                    .foregroundColor(.white)
+                                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                
+                                Text(formatTimestamp(msg.timestamp))
+                                    .font(.caption)
+                                    .foregroundColor(.gray)
+                            }
                         }
                     }
                     else {
                         HStack {
-                            Text(msg.content)
-                                .padding()
-                                .background(msg.senderId == senderNickName ? Color.blue : Color.gray)
-                                .foregroundColor(.white)
-                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            VStack(alignment: .leading) {
+                                Text(msg.content)
+                                    .padding()
+                                    .background(msg.senderId == senderNickName ? Color.blue : Color.indigo)
+                                    .foregroundColor(.white)
+                                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                
+                                Text(formatTimestamp(msg.timestamp))
+                                    .font(.caption)
+                                    .foregroundColor(.gray)
+                            }
                             Spacer()
                         }
                     }
@@ -97,6 +109,13 @@ struct ChatBoxView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.gray.opacity(0.2))
         .cornerRadius(10)
+    }
+    
+    // Function to format timestamp
+    func formatTimestamp(_ timestamp: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"  // Customize the timestamp format as needed
+        return formatter.string(from: timestamp)
     }
     
     func receiveMessage(msg: String) {

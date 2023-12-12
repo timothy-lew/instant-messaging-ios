@@ -20,13 +20,19 @@ struct ChatView: View {
         NavigationStack {
             HStack {
                 VStack {
+                    Text("Users")
+                        .font(.title)
                     ForEach(users, id: \.nickName) { user in
                         // sender cannot talk to himself
                         if (user.nickName != senderNickName) {
                             Button(action: {
                                 recipient = user
                             }) {
-                                Text(user.nickName)
+                                HStack() {
+                                    Image(systemName: "person.circle")
+                                    Text(user.nickName)
+                                }
+                                .padding(.vertical, 5)
                             }
                         }
                     }
@@ -35,6 +41,8 @@ struct ChatView: View {
                             logout()
                         }
                     }
+                    .buttonStyle(BorderlessButtonStyle())
+                    .foregroundColor(.red)
                 }
                 .padding(10)
                 .onAppear {
