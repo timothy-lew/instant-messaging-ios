@@ -128,7 +128,9 @@ struct ChatBoxView: View {
             }
         }
         .onReceive(stomp.receivedSubject) { receivedMessage in
-            receiveMessage(msg: receivedMessage)
+            Task {
+                await receiveMessage(msg: receivedMessage)
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.gray.opacity(0.2))
@@ -142,13 +144,14 @@ struct ChatBoxView: View {
         return formatter.string(from: timestamp)
     }
     
-    func receiveMessage(msg: String) {
+    func receiveMessage(msg: String) async {
         // convert to json
         if let jsonData = msg.data(using: .utf8) {
             do {
                 let chatMessage = try JSONDecoder().decode(ChatMessage.self, from: jsonData)
                 if (recipient.nickName == chatMessage.senderId) {
-                    messages.append(chatMessage)
+//                    messages.append(chatMessage)
+                    await getMessages()
                     scrollId = messages.last?.timestamp
                 }
             } catch {
@@ -162,7 +165,7 @@ struct ChatBoxView: View {
         
         Task {
             do {
-                usleep(100000) // sleep  0.10
+                usleep(20000) // sleep  0.10
                 let (data, _) = try await URLSession.shared.data(from: url)
                 
                 messages = try JSONDecoder().decode([ChatMessage].self, from: data)
@@ -177,6 +180,7 @@ struct ChatBoxView: View {
     
     func sendMessage() async {
         let chatMessage = ChatMessage(senderId: senderNickName, recipientId: recipient.nickName, content: message, timestamp: Date.now)
+        message = ""
         print(Date.now)
         
         guard let encoded = try? JSONEncoder().encode(chatMessage) else {
@@ -187,7 +191,6 @@ struct ChatBoxView: View {
         print(jsonString!)
         
         stomp.swiftStomp.send(body: chatMessage, to: "/app/chat")
-        message = ""
         
         await getMessages()
     }
