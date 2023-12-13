@@ -23,26 +23,15 @@ struct ChatBoxView: View {
     @State private var scrollId: Date?
     var receivedCancellable: AnyCancellable?
     
+    @State private var previousMessage: ChatMessage?
+    
     var body: some View {
         VStack {
             HStack {
-//                Spacer()
                 Text("\(recipient.fullName)")
                     .font(.headline)
                     .padding(.top, 10)
-//                    .padding(.bottom, 10)
                     .frame(maxWidth: .infinity, alignment: .center)
-                    
-                
-//                Spacer()
-                
-//                Image(systemName: "person.circle")
-//                    .resizable()
-//                    .scaledToFit()
-//                    .frame(width: 40, height: 40)
-//                    .clipShape(Circle())
-//                    .padding(.top, 10)
-//                    .foregroundColor(.gray)
             }
             
             Divider()
@@ -57,6 +46,13 @@ struct ChatBoxView: View {
             
             ScrollView {
                 ForEach(messages, id:\.timestamp) { msg in
+                    if isNewDay(previousDate: previousMessage?.timestamp, currentDate: msg.timestamp) {
+                        Text(formatDate(msg.timestamp))
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                        Divider() // Add a divider for separation
+                    }
+                    
                     if (msg.senderId == senderNickName) {
                         HStack {
                             Spacer()
@@ -71,6 +67,9 @@ struct ChatBoxView: View {
                                     .font(.caption)
                                     .foregroundColor(.gray)
                             }
+                        }
+                        .onAppear() {
+                            previousMessage = msg
                         }
                     }
                     else {
@@ -88,6 +87,9 @@ struct ChatBoxView: View {
                             }
                             Spacer()
                         }
+                        .onAppear() {
+                            previousMessage = msg
+                        }
                     }
                 }
                 .padding()
@@ -97,9 +99,9 @@ struct ChatBoxView: View {
             
             HStack {
                 TextField("Message", text: $message, axis: .vertical)
-                    .padding(EdgeInsets(top: 10, leading: 16, bottom: 10, trailing: 16))
+                    .padding(EdgeInsets(top: 10, leading: 16, bottom: 10, trailing: 8))
                     .background(Color(UIColor.systemGray6))
-                    .cornerRadius(20)
+                    .cornerRadius(15)
                     .textFieldStyle(PlainTextFieldStyle())
                     .shadow(radius: 3)
                 
@@ -134,6 +136,25 @@ struct ChatBoxView: View {
         .background(Color.gray.opacity(0.2))
         .cornerRadius(10)
     }
+    
+    func isNewDay(previousDate: Date?, currentDate: Date) -> Bool {
+        guard let previousDate = previousDate else {
+            return true // Display the date for the first message
+        }
+
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.year, .month, .day], from: previousDate)
+        let previousDay = calendar.date(from: components)!
+
+        return !calendar.isDate(currentDate, inSameDayAs: previousDay)
+    }
+
+    func formatDate(_ date: Date) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "d MMM"
+        return dateFormatter.string(from: date)
+    }
+
     
     // Function to format timestamp
     func formatTimestamp(_ timestamp: Date) -> String {
