@@ -4,7 +4,8 @@ InstantMessaging is a simple messaging application that allows users to chat wit
 
 ## Demo
 
-<iframe width="560" height="315" src="(https://www.youtube.com/watch?v=PcDNkGa3OaE" frameborder="0" allowfullscreen></iframe>
+Click below for the video demonstration on youtube
+[![Watch the video](https://img.youtube.com/vi/PcDNkGa3OaE/maxresdefault.jpg)](https://www.youtube.com/watch?v=PcDNkGa3OaE)
 
 ## Features
 
