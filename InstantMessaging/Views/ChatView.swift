@@ -16,15 +16,29 @@ struct ChatView: View {
     @State private var users = [User]()
     @State private var recipient: User?
     
+    @State private var showOnlineUsers = false
+    
     var body: some View {
         NavigationStack {
-            HStack {
-                VStack {
-                    Text("Users")
-                        .font(.title2)
-                    ForEach(users, id: \.nickName) { user in
+            List {
+                Toggle("Show Online Users", isOn: $showOnlineUsers)
+                    .padding(.bottom, 10)
+                
+                ForEach(users, id: \.nickName) { user in
+                    if user.nickName != senderNickName {
                         // sender cannot talk to himself
-                        if (user.nickName != senderNickName) {
+                        if (showOnlineUsers && user.status == Status.ONLINE) {
+                            NavigationLink {
+                                ChatBoxView(stomp: stomp, senderNickName: $senderNickName, recipient: user)
+                            } label: {
+                                HStack() {
+                                    Image(systemName: "person.circle")
+                                    Text(user.nickName)
+                                }
+                                .padding(.vertical, 5)
+                            }
+                        }
+                        else {
                             NavigationLink {
                                 ChatBoxView(stomp: stomp, senderNickName: $senderNickName, recipient: user)
                             } label: {
@@ -36,20 +50,30 @@ struct ChatView: View {
                             }
                         }
                     }
-                    Button("Logout") {
-                        Task {
-                            logout()
+                }
+                .onChange(of: showOnlineUsers) {
+                    Task {
+                        if (showOnlineUsers == true) {
+                            await getOnlineUsers()
+                        }
+                        else {
+                            await getUsers()
                         }
                     }
-                    .buttonStyle(BorderlessButtonStyle())
-                    .foregroundColor(.red)
                 }
-                .padding(10)
-                .onAppear {
+                Button("Logout") {
                     Task {
-                        await getUsers()
-                        await getUser()
+                        logout()
                     }
+                }
+                .buttonStyle(BorderlessButtonStyle())
+                .foregroundColor(.red)
+            }
+            .padding(10)
+            .onAppear {
+                Task {
+                    await getUsers()
+                    await getUser()
                 }
             }
         }
@@ -71,6 +95,21 @@ struct ChatView: View {
                 let (data, _) = try await URLSession.shared.data(from: url)
                 let userDecoded = try JSONDecoder().decode(User.self, from: data)
                 user = userDecoded
+            } catch {
+                print("GET request failed: \(error.localizedDescription)")
+                print(String(describing: error))
+            }
+        }
+    }
+    
+    func getOnlineUsers() async {
+        let url = URL(string: "http://localhost:8088/users/online")!
+        
+        Task {
+            do {
+                let (data, _) = try await URLSession.shared.data(from: url)
+                let usersDecoded = try JSONDecoder().decode([User].self, from: data)
+                users = usersDecoded
             } catch {
                 print("GET request failed: \(error.localizedDescription)")
                 print(String(describing: error))

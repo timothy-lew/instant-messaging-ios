@@ -162,8 +162,7 @@ struct ChatBoxView: View {
         
         Task {
             do {
-                usleep(250000) // sleep  0.25
-                // usleep(1000000) //  sleep 1s
+                usleep(100000) // sleep  0.10
                 let (data, _) = try await URLSession.shared.data(from: url)
                 
                 messages = try JSONDecoder().decode([ChatMessage].self, from: data)
