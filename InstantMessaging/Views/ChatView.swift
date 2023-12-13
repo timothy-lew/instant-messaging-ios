@@ -21,13 +21,13 @@ struct ChatView: View {
             HStack {
                 VStack {
                     Text("Users")
-                        .font(.title)
+                        .font(.title2)
                     ForEach(users, id: \.nickName) { user in
                         // sender cannot talk to himself
                         if (user.nickName != senderNickName) {
-                            Button(action: {
-                                recipient = user
-                            }) {
+                            NavigationLink {
+                                ChatBoxView(stomp: stomp, senderNickName: $senderNickName, recipient: user)
+                            } label: {
                                 HStack() {
                                     Image(systemName: "person.circle")
                                     Text(user.nickName)
@@ -50,14 +50,6 @@ struct ChatView: View {
                         await getUsers()
                         await getUser()
                     }
-                }
-                
-                if let recipient = recipient {
-                    ChatBoxView(stomp: stomp, senderNickName: $senderNickName, recipient: recipient)
-                } else {
-                    Text("Select a user to start chatting")
-                        .foregroundColor(.gray)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
         }

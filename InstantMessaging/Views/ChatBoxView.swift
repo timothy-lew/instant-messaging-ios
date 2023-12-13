@@ -25,12 +25,29 @@ struct ChatBoxView: View {
     
     var body: some View {
         VStack {
-            Text("Chatting with \(recipient.fullName)")
-                .font(.headline)
-                .padding(.top, 10)
-                .padding(.bottom, 10)
+            HStack {
+//                Spacer()
+                Text("\(recipient.fullName)")
+                    .font(.headline)
+                    .padding(.top, 10)
+//                    .padding(.bottom, 10)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    
+                
+//                Spacer()
+                
+//                Image(systemName: "person.circle")
+//                    .resizable()
+//                    .scaledToFit()
+//                    .frame(width: 40, height: 40)
+//                    .clipShape(Circle())
+//                    .padding(.top, 10)
+//                    .foregroundColor(.gray)
+            }
             
             Divider()
+                .frame(height: 1)
+                .overlay(.black)
             
 //            Button("DEBUG", systemImage: "gobackward") {
 //                Task {
@@ -91,6 +108,13 @@ struct ChatBoxView: View {
                         await sendMessage()
                     }
                 }
+            }
+        }
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Text("Logged in as: \(senderNickName)")
+                    .font(.headline)
+                    .foregroundColor(.green)
             }
         }
         .onChange(of: recipient) {
